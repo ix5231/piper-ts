@@ -1,13 +1,13 @@
 type Pipe<T> = T extends Promise<any> ? PipeAsync<Awaited<T>> : PipeSync<T>;
 
-function Pipe<T>(initialValue: T): Pipe<T> {
+export function Pipe<T>(initialValue: T): Pipe<T> {
   if (initialValue instanceof Promise) {
     return new PipeAsync(initialValue) as Pipe<T>;
   }
   return new PipeSync(initialValue) as Pipe<T>;
 }
 
-class PipeSync<T> {
+export class PipeSync<T> {
   #value: T;
 
   constructor(value: T) {
@@ -67,7 +67,7 @@ class PipeSync<T> {
   }
 }
 
-class PipeAsync<T> {
+export class PipeAsync<T> {
   #value: Promise<T>;
 
   constructor(value: Promise<T>) {
