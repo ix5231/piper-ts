@@ -1,4 +1,6 @@
-type Pipe<T> = T extends Promise<any> ? PipeAsync<Awaited<T>> : PipeSync<T>;
+type NoDistribute<T> = [T] extends [T] ? T : never;
+type Pipe<T> =
+  NoDistribute<T> extends Promise<any> ? PipeAsync<Awaited<T>> : PipeSync<T>;
 
 export function Pipe<T>(initialValue: T): Pipe<T> {
   if (initialValue instanceof Promise) {
@@ -22,7 +24,7 @@ export class PipeSync<T> {
     return Pipe(fn(this.#value));
   }
 
-  andThen<F extends (arg: Exclude<T, Error>) => any>(
+  andOk<F extends (arg: Exclude<T, Error>) => any>(
     fn: F
   ): Pipe<ReturnType<F> | Extract<T, Error>> {
     if (this.#value instanceof Error) {
@@ -82,9 +84,9 @@ export class PipeAsync<T> {
     return Pipe(this.#value.then(fn));
   }
 
-  andThen<F extends (arg: Exclude<T, Error>) => any>(
+  andOk<F extends (arg: Exclude<T, Error>) => any>(
     fn: F
-  ): PipeAsync<ReturnType<F> | Extract<T, Error>> {
+  ): PipeAsync<Awaited<ReturnType<F>> | Extract<T, Error>> {
     return Pipe(
       this.#value.then((v) => {
         if (v instanceof Error) {
